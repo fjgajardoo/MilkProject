@@ -17,7 +17,7 @@ library(lme4)
 
 ## Import data----
 
-dir.frans <- c('C:/Users/Francisco Gajardo/Google Drive/THESIS/')
+dir.frans <- c('C:/Users/Francisco Gajardo/Documents/GitHub/MilkProject')
 # theme_set(theme_bw())
 active.dir <- dir.frans; setwd(active.dir)
 

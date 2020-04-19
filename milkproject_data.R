@@ -17,7 +17,7 @@ library(lme4)
 
 ## Import data----
 
-dir.frans <- c('C:/Users/Francisco Gajardo/Documents/GitHub/MilkProject')
+dir.frans <- c('C:/Users/Francisco Gajardo/Documents/GitHub/MilkProject/')
 # theme_set(theme_bw())
 active.dir <- dir.frans; setwd(active.dir)
 
@@ -84,6 +84,10 @@ data$DiffDIM<- as.numeric(data$DIM - data$EffDIM) #Difference BTWN DIM and effec
 MaxDIMS<-data%>%group_by(AniId,Lac, grp)%>%summarise(MaxDIM=max(DIM))
 MaxDIMS_threshold<-subset(MaxDIMS,MaxDIM>400)
 LowDIMS<- MaxDIMS$grp[which(MaxDIMS$MaxDIM<200)]
+data <- data[!(data$grp %in% LowDIMS),] #Remove lactations with MaxDIM<200
+data$EC_AVG=(data$ECLF+data$ECLH+data$ECRF+data$ECRH)/4
+data%>%filter(!(ECLF>EC_AVG*1.1 | ECRF>EC_AVG*1.1 | ECLH>EC_AVG*1.1 | ECRH>EC_AVG*1.1))
+# length(data$AniId) #Now 367424
 
 #MY corrected by MI ANALYSIS----
 # count(data[data$MI<4*60^2,]) #296 milking sessions under 4 hours

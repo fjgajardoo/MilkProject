@@ -70,30 +70,30 @@ fit.measures.wood1<-rbind(c(RMSE.w1,MAE.w1,MPE.w1, AIC.w1,BIC.w1)); colnames(fit
 
 dataQTR_daily$std.DQMY_wood <- predict(fit.wood1, dataQTR_daily$DIM)
 dataQTR_daily$filter1 <- ifelse(dataQTR_daily$std.DQMY_wood /dataQTR_daily$std.DQMY<0.8,1,0) #Lower than 80%
-dataQTR_daily$filter1.1 <- ifelse(dataQTR_daily$filter1==1,(sequence(rle(as.numeric(dataQTR_daily$filter1))$lengths)),0)#Number of consecutive days below 80%
-dataQTR_daily$filter1.2<-0
+# dataQTR_daily$filter1.1 <- ifelse(dataQTR_daily$filter1==1,(sequence(rle(as.numeric(dataQTR_daily$filter1))$lengths)),0)#Number of consecutive days below 80%
+# dataQTR_daily$filter1.2<-0
 
-for (i in 1:length(dataQTR_daily$AniId)){
-  if(dataQTR_daily$filter1.1[i]<4) 
-  {dataQTR_daily$filter1.2[i]=0} else
-    if(dataQTR_daily$filter1.1[i]>4){
-      dataQTR_daily$filter1.2[i]=1} else
-        if (dataQTR_daily$filter1.1[i]==4){
-          dataQTR_daily$filter1.2[i]=1
-          dataQTR_daily$filter1.2[i-1]=1
-          dataQTR_daily$filter1.2[i-2]=1
-          dataQTR_daily$filter1.2[i-3]=1
-        }
-}
+# for (i in 1:length(dataQTR_daily$AniId)){
+#   if(dataQTR_daily$filter1.1[i]<4) 
+#   {dataQTR_daily$filter1.2[i]=0} else
+#     if(dataQTR_daily$filter1.1[i]>4){
+#       dataQTR_daily$filter1.2[i]=1} else
+#         if (dataQTR_daily$filter1.1[i]==4){
+#           dataQTR_daily$filter1.2[i]=1
+#           dataQTR_daily$filter1.2[i-1]=1
+#           dataQTR_daily$filter1.2[i-2]=1
+#           dataQTR_daily$filter1.2[i-3]=1
+#         }
+# }
 
 
-length(unique(paste(dataQTR_daily$grp,
-                    dataQTR_daily$Quarter))) #2012 QL
-
-dataQTR_daily.wood2<-dataQTR_daily[dataQTR_daily$filter1.2!=1,]
+dataQTR_daily.wood2<-dataQTR_daily[dataQTR_daily$filter1!=1,]
 length(unique(paste(dataQTR_daily.wood2$grp,
-                    dataQTR_daily.wood2$Quarter))) #2009
-# 
+                    dataQTR_daily.wood2$Quarter))) #1620 QL
+length(unique(dataQTR_daily.wood2$AniId)) #190
+
+length(dataQTR_daily.wood2$grp) #349180
+
 # length(unique(dataQTR_daily.sample.wood$AniId))
 # length(unique(dataQTR_daily.sample.wood$grp))
 # length(unique(dataQTR_daily.sample.filtered$AniId))
@@ -145,22 +145,29 @@ for (i in 1:length(dataQTR_daily.wood2$AniId)){
         }
 }
 
-filter.wood2<-unique(paste(dataQTR_daily.wood2[dataQTR_daily.wood2$filter1.2==1,]$grp,
-             dataQTR_daily.wood2[dataQTR_daily.wood2$filter1.2==1,]$Quarter))
-
+# filter.wood2<-unique(paste(dataQTR_daily.wood2[dataQTR_daily.wood2$filter1.2==1,]$grp,
+#              dataQTR_daily.wood2[dataQTR_daily.wood2$filter1.2==1,]$Quarter))
+# 
 dataQTR_daily.wood2$grpQTR <- paste(dataQTR_daily.wood2$grp,dataQTR_daily.wood2$Quarter)
-dataQTR_daily.wood2_1<-dataQTR_daily.wood2[!(dataQTR_daily.wood2$grpQTR %in% filter.wood2),]
+# dataQTR_daily.wood2_1<-dataQTR_daily.wood2[!(dataQTR_daily.wood2$grpQTR %in% filter.wood2),]
+
+dataQTR_daily.wood2_1<-dataQTR_daily.wood2[dataQTR_daily.wood2$filter1.2!=1,]
 
 length(unique(paste(dataQTR_daily.wood2_1$grp,
-                    dataQTR_daily.wood2_1$Quarter))) #775 QL
+                    dataQTR_daily.wood2_1$Quarter))) #1615 QL
 
+length(dataQTR_daily.wood2_1$grp) #298324 milkings
+length(unique(paste(dataQTR_daily.wood2_1$grp,
+                    dataQTR_daily.wood2_1$Quarter))) #1615 QL
+length(unique(dataQTR_daily.wood2_1$AniId)) #190 Animals
 
 #WOOD LINEARIZED QUARTER LEVEL----
 #NEW DATA:
 
-filter.final<-unique(dataQTR_daily.wood2_1$grpQTR)
+filter.final<-unique(paste(dataQTR_daily.wood2_1$grpQTR,dataQTR_daily.wood2_1$DateMilking))
+length(filter.final)
 
-dataQTR.final<-subset(dataQTR,grpQTR %in% filter.final)%>%filter(QMY>0.25*1000, TMY>1.0*1000, (MI_hr)<24, DIM<=305)%>% 
+dataQTR.final<-subset(dataQTR,(paste(grpQTR,DateMilking)) %in% filter.final)%>%filter(QMY>0.25*1000, TMY>1.0*1000, (MI_hr)<24, DIM<=305)%>% 
   mutate(MIprime= (2.5/(1+5*exp(-0.25*MI_hr)))-(2.5/(1+5*exp(-0.25)))) #Ver si lo necesito y como hacerlo
 
 length(unique(dataQTR.final$AniId))
@@ -182,8 +189,8 @@ fit.wood.lm.QMY<-lm(wood.lm.QMY, data = dataQTR.final)
 sum_fitwood_QMY<-summary(fit.wood.lm.QMY)
 
 RSS.wood <- c(crossprod(sum_fitwood_QMY$residuals))
-MSE.wood <- RSS / length(sum_fitwood_QMY$residuals)
-RMSE.wood <- sqrt(MSE)
+MSE.wood <- RSS.wood / length(sum_fitwood_QMY$residuals)
+RMSE.wood <- sqrt(MSE.wood)
 AIC.wood<-AIC(fit.wood.lm.QMY)
 BIC.wood<-BIC(fit.wood.lm.QMY)
 MAE.wood<- sum(abs(dataQTR.final$QMY - exp(fitted(fit.wood.lm.QMY))))/length(sum_fitwood_QMY$residuals)

@@ -1,3 +1,10 @@
+# library(ggplot2)
+# library(GGally)
+# library(ggthemes)
+# library(gganimate)
+
+# theme_set(theme_bw())
+
 #### DESCRIPTIVE ANALYSIS----
 
 #Milking data set
